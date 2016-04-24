@@ -11,14 +11,14 @@
 # Requisites: library python-mysqldb. To install: "apt-get install python-mysqldb"
 ##################################################################################
 
-
-import MySQLdb
+#import MySQLdb
 import logging, logging.handlers
 import os
 import json
 import sys
 import datetime
 import calendar
+import requests
 import time
 
 #### VARIABLES #########################################################
@@ -32,7 +32,8 @@ LOG_FOR_ROTATE = 10
 API_URL = config['api_url']
 
 
-PID = "/var/run/timing-generator"
+#PID = "/var/run/timing-generator"
+PID = "./timing-generator"
 
 from json import encoder
 encoder.FLOAT_REPR = lambda o: format(o, '.4f')
@@ -40,7 +41,7 @@ encoder.FLOAT_REPR = lambda o: format(o, '.4f')
 
 ########################################################################
 # definimos los logs internos que usaremos para comprobar errores
-log_folder = os.path.dirname(INTERNAL_LOG)
+log_folder = os.path.dirname(INTERNAL_LOG_FILE)
 
 if not os.path.exists(log_folder):
 	os.makedirs(log_folder)
@@ -85,15 +86,15 @@ def getUTC():
 	t = calendar.timegm(datetime.datetime.utcnow().utctimetuple())
 	return int(t)
 
-def getTiming():
-		headers = {"Content-type": "application/json"}	
+def genTiming():
+	headers = {"Content-type": "application/json"}	
 	try:
-		response = requests.post(API_URL, headers=headers, data = data, verify=False, timeout=2)
-		print "code:"+ str(response.status_code)
+		response = requests.get(API_URL)
+		#print "code:"+ str(response.status_code)
 		#print "headers:"+ str(response.headers)
-		#print "content:"+ str(response.text)
-	except:
-		print "Error al llamar a la api"
+		print "content:"+ str(response.text)
+	except requests.ConnectionError as e:
+		print "Error al llamar a la api:" + str(e)
 
 genTiming()
 
