@@ -20,6 +20,7 @@ import datetime
 import calendar
 import requests
 import time
+import xml.etree.ElementTree
 
 #### VARIABLES #########################################################
 from configobj import ConfigObj
@@ -92,7 +93,12 @@ def genTiming():
 		response = requests.get(API_URL)
 		#print "code:"+ str(response.status_code)
 		#print "headers:"+ str(response.headers)
-		print "content:"+ str(response.text)
+		#print "content:"+ str(response.text)
+		timingXml = response.text
+		e = xml.etree.ElementTree.parse(timingXml).getroot()
+		for atype in e.findall('type'):
+			print(atype.get('competitor'))
+
 	except requests.ConnectionError as e:
 		print "Error al llamar a la api:" + str(e)
 
